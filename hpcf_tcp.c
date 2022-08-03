@@ -83,11 +83,63 @@ void hpcf_tcp_process_read_data(struct hpcf_connection *conn)
             // 先验session
             struct hpcf_processor_module *session_module = hpcf_get_processor_module_by_type(HPCF_MODULE_TYPE_LOGIN_AUTH);
             hpcf_module_processor_callback cb = session_module->callback;
-            ret = cb(conn->read_buffer, conn->read_len, conn->write_buffer, &conn->write_len, &session_module->data, &conn->data);
+            ret = cb(conn->read_buffer, conn->read_len, conn->write_buffer, &conn->write_len,
+                        &session_module->data, &conn->data,
+                        hpcf_get_processor_callback_by_type);
             if (ret != 0) {
                 printf("session verify error\n");
                 return ;
             }
+            // 再根据操作类型，调用对应的模块
+            type = HPCF_MODULE_TYPE_OPERATION_PROCESS;
+        }
+
+        else if(strcmp(header.request_type, "KeyManager") == 0) {
+            // 先验session
+            struct hpcf_processor_module *session_module = hpcf_get_processor_module_by_type(HPCF_MODULE_TYPE_LOGIN_AUTH);
+            hpcf_module_processor_callback cb = session_module->callback;
+            ret = cb(conn->read_buffer, conn->read_len, conn->write_buffer, &conn->write_len,
+                        &session_module->data, &conn->data,
+                        hpcf_get_processor_callback_by_type);
+            if (ret != 0) {
+                printf("session verify error\n");
+                return ;
+            }
+            // 再根据操作类型，调用对应的模块
+            type = HPCF_MODULE_TYPE_KEY_MANAGER;
+            // 调用完密钥管理，再处理数据同步
+            // 这里的数据同步，是指将密钥同步到其他节点
+            type = HPCF_MODULE_TYPE_CONFIG_SYNC;
+        }
+
+        else if(strcmp(header.request_type, "UserManager") == 0) {
+            // 先验session
+            struct hpcf_processor_module *session_module = hpcf_get_processor_module_by_type(HPCF_MODULE_TYPE_LOGIN_AUTH);
+            hpcf_module_processor_callback cb = session_module->callback;
+            ret = cb(conn->read_buffer, conn->read_len, conn->write_buffer, &conn->write_len,
+                        &session_module->data, &conn->data,
+                        hpcf_get_processor_callback_by_type);
+            if (ret != 0) {
+                printf("session verify error\n");
+                return ;
+            }
+            // 再根据操作类型，调用对应的模块
+            type = HPCF_MODULE_TYPE_USER_MANAGER;
+        }
+
+        else if(strcmp(header.request_type, "ConfigSync") == 0) {
+            // 先验session
+            struct hpcf_processor_module *session_module = hpcf_get_processor_module_by_type(HPCF_MODULE_TYPE_LOGIN_AUTH);
+            hpcf_module_processor_callback cb = session_module->callback;
+            ret = cb(conn->read_buffer, conn->read_len, conn->write_buffer, &conn->write_len,
+                        &session_module->data, &conn->data,
+                        hpcf_get_processor_callback_by_type);
+            if (ret != 0) {
+                printf("session verify error\n");
+                return ;
+            }
+            // 再根据操作类型，调用对应的模块
+            type = HPCF_MODULE_TYPE_KEY_MANAGER;
         }
     }
 
@@ -106,7 +158,9 @@ void hpcf_tcp_process_read_data(struct hpcf_connection *conn)
     // 这里处理完毕后，数据就写到了conn->write_buffer中，后面再写到socket中就可以了
     // module->data是模块数据存放指针
     // TODO: 目前感觉还需要再传递一个此连接存放数据的指针，用来存放当前连接的一些数据
-    ret = callback(conn->read_buffer, conn->read_len, conn->write_buffer, &conn->write_len, &module->data, &conn->data);
+    ret = callback(conn->read_buffer, conn->read_len, conn->write_buffer, &conn->write_len,
+                &module->data, &conn->data,
+                hpcf_get_processor_callback_by_type);
 }
 
 // 用来建立连接的回调函数

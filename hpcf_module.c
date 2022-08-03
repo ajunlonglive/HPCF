@@ -233,3 +233,12 @@ int hpcf_module_manager_init()
     INIT_LIST_HEAD(&g_module_list);
     return 0;
 }
+
+void * hpcf_get_processor_callback_by_type(int type)
+{
+    struct hpcf_processor_module *module = hpcf_get_processor_module_by_type(type);
+    if (module == NULL) {
+        return NULL;
+    }
+    return module->callback;
+}

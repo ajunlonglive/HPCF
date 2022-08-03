@@ -37,7 +37,9 @@ int hpcf_module_lib_init(struct hpcf_processor_module *module)
 
 // 如果json header中sessionid不为空的话，则验证sessionid是否有效，如果有效则返回0，否则返回-1
 // 如果json header中sessionid为空的话，则认为是请求sessionid的流程，最终返回一个sessionid
-int login_auth_processor_callback(char *in, int in_size, char *out, int *out_size, void **module_data, void **conn_data)
+int login_auth_processor_callback(char *in, int in_size, char *out, int *out_size,
+            void **module_data, void **conn_data,
+            hpcf_module_get_another_processor_callback_t get_another_processor)
 {
     int ret = 0;
     struct login_auth_req req = {0};

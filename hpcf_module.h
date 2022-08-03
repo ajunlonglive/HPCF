@@ -9,8 +9,11 @@
 
 #define HPCF_MODULE_LIB_INIT_FUNC "hpcf_module_lib_init"
 
+typedef void *(*hpcf_module_get_another_processor_callback_t)(int module_type);
+
 typedef int (*hpcf_module_processor_callback)(char *in, int in_size, char *out, int *out_size,
-                void **module_data, void **conn_data);
+                void **module_data, void **conn_data,
+                hpcf_module_get_another_processor_callback_t get_another_processor);
 
 // 用来加载指定目录下的所有模块并注册到指定的模块管理器中
 
@@ -55,6 +58,8 @@ struct hpcf_processor_module *hpcf_get_processor_module_by_name(char *name);
 
 // 通过模块类型获取模块结构
 struct hpcf_processor_module *hpcf_get_processor_module_by_type(int type);
+
+void *hpcf_get_processor_callback_by_type(int type);
 
 int hpcf_register_processor_module(struct hpcf_processor_module *module);
 

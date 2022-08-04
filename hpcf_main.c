@@ -24,6 +24,7 @@
 #include "hpcf_epoll_wraper.h"
 #include "hpcf_setaffinity.h"
 #include "hpcf_module.h"
+#include "hpcf_timer_event.h"
 
 // 用来保存listenfd的事件 弃用
 struct hpcf_event g_listen_event;
@@ -56,6 +57,14 @@ struct list_head g_all_connection_queue;
 
 int g_listen_fd = 0;
 struct hpcf_connection *g_listen_conn = NULL;
+
+// 用来保存定时任务的根
+RBRoot *g_timer_root = NULL;
+
+void timer_test(void *arg)
+{
+    printf("timer test\n");
+}
 
 #if 0
 
@@ -228,6 +237,9 @@ void hpcf_worker_process_content()
                 hpcf_epoll_disable_accept_event(g_epoll_fd, g_listen_conn);
             }
 
+            // 查找一个合适的休眼时间
+            timeout = hpcf_find_sleep_time(g_timer_root);
+
             // 如果其它任务队列中有任务，则监听listen_epfd时不阻塞
             // 否则监听listen_epfd时阻塞
             if (list_empty(&g_other_task_queue)) {
@@ -268,6 +280,7 @@ void hpcf_worker_process_content()
         } while (0);
 
         // ==============================================================================
+        hpcf_execute_timer_event(g_timer_root);
         // 上面处理了连接事件，下面处理其它任务
         // 其它任务也就是读写socket事件
         
@@ -459,6 +472,7 @@ int main(int argc, char *argv[])
             // worker process
             // set worker process affinity
             hpcf_set_affinity(i);
+            g_timer_root = create_rbtree();
             // 创建epollfd
             g_epoll_fd = epoll_create(HPCF_MAX_EVENTS);
             struct hpcf_connection *listen_conn = hpcf_new_connection(listen_fd,
@@ -492,6 +506,19 @@ int main(int argc, char *argv[])
     // wait for worker process
     wait(NULL);
 #else
+
+    g_timer_root = create_rbtree();
+
+    // 创建一个定时任务
+    struct timer_event timer_event = {0};
+    timer_event.interval = 2000;
+    timer_event.root = g_timer_root;
+    timer_event.persisent = 1;
+    timer_event.function = hpcf_create_next_timer_event;
+    timer_event.event_callback = timer_test;
+    Type value = hpcf_get_current_time();
+    insert_rbtree(g_timer_root, value, &timer_event);
+    printf("timer_event.value: %ld\n", value+2000);
 
     g_epoll_fd = epoll_create(HPCF_MAX_EVENTS);
     struct hpcf_connection *listen_conn = hpcf_new_connection(listen_fd,

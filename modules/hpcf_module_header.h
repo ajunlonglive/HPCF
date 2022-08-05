@@ -6,7 +6,7 @@ struct list_head {
     struct list_head *prev;
 };
 
-typedef int (*hpcf_module_get_another_processor_callback_t)(int module_type);
+typedef void *(*hpcf_module_get_another_processor_callback_t)(int module_type);
 
 typedef int (*hpcf_module_processor_callback)(char *in, int in_size, char *out, int *out_size,
                 void **module_data, void **conn_data,

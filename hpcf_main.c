@@ -280,6 +280,7 @@ void hpcf_worker_process_content()
         } while (0);
 
         // ==============================================================================
+        // 执行定时器任务
         hpcf_execute_timer_event(g_timer_root);
         // 上面处理了连接事件，下面处理其它任务
         // 其它任务也就是读写socket事件

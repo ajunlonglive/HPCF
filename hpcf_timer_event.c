@@ -797,6 +797,8 @@ void hpcf_create_next_timer_event(void *arg)
     new_event.interval = t_event->interval;
     new_event.count = t_event->count++;
     new_event.root = t_event->root;
+    new_event.function = t_event->function;
+    new_event.event_callback = t_event->event_callback;
 
     Type current_time = hpcf_get_current_time();
 

@@ -16,6 +16,9 @@
 #include "hpcf_module.h"
 #include "hpcf_json_helper.h"
 #include "hpcf_module_type.h"
+#include "hpcf_http.h"
+
+#include "libhttp/llhttp.h"
 
 extern int g_epoll_fd;
 extern struct list_head g_other_task_queue;
@@ -71,8 +74,11 @@ void hpcf_tcp_process_read_data(struct hpcf_connection *conn)
     int ret = 0;
     int type = HPCF_MODULE_TYPE_UNKNOWN;
     struct hpcf_tcp_data_header header = {0};
+    char *out_body = NULL;
 
-    ret = hpcf_tcp_parse_data_from_header(conn->read_buffer, &header);
+    ret = hpcf_http_get_body(conn);
+
+    ret = hpcf_tcp_parse_data_from_header(conn->body, &header);
     if (ret == 0) {
         printf("hpcf_tcp_parse_data_from_header error\n");
         if (strcmp(header.request_type, "Session") == 0) {
@@ -83,11 +89,14 @@ void hpcf_tcp_process_read_data(struct hpcf_connection *conn)
             // 先验session
             struct hpcf_processor_module *session_module = hpcf_get_processor_module_by_type(HPCF_MODULE_TYPE_LOGIN_AUTH);
             hpcf_module_processor_callback cb = session_module->callback;
-            ret = cb(conn->read_buffer, conn->read_len, conn->write_buffer, &conn->write_len,
+            ret = cb(conn->body, conn->read_len, &out_body, &conn->write_len,
                         &session_module->data, &conn->data,
                         hpcf_get_processor_callback_by_type);
             if (ret != 0) {
                 printf("session verify error\n");
+                hpcf_http_make_response(conn, out_body, conn->write_len);
+                if (out_body != NULL)
+                    free(out_body);
                 return ;
             }
             // 再根据操作类型，调用对应的模块
@@ -98,11 +107,14 @@ void hpcf_tcp_process_read_data(struct hpcf_connection *conn)
             // 先验session
             struct hpcf_processor_module *session_module = hpcf_get_processor_module_by_type(HPCF_MODULE_TYPE_LOGIN_AUTH);
             hpcf_module_processor_callback cb = session_module->callback;
-            ret = cb(conn->read_buffer, conn->read_len, conn->write_buffer, &conn->write_len,
+            ret = cb(conn->body, conn->read_len, &out_body, &conn->write_len,
                         &session_module->data, &conn->data,
                         hpcf_get_processor_callback_by_type);
             if (ret != 0) {
                 printf("session verify error\n");
+                hpcf_http_make_response(conn, out_body, conn->write_len);
+                if (out_body != NULL)
+                    free(out_body);
                 return ;
             }
             // 再根据操作类型，调用对应的模块
@@ -116,11 +128,14 @@ void hpcf_tcp_process_read_data(struct hpcf_connection *conn)
             // 先验session
             struct hpcf_processor_module *session_module = hpcf_get_processor_module_by_type(HPCF_MODULE_TYPE_LOGIN_AUTH);
             hpcf_module_processor_callback cb = session_module->callback;
-            ret = cb(conn->read_buffer, conn->read_len, conn->write_buffer, &conn->write_len,
+            ret = cb(conn->body, conn->read_len, &out_body, &conn->write_len,
                         &session_module->data, &conn->data,
                         hpcf_get_processor_callback_by_type);
             if (ret != 0) {
                 printf("session verify error\n");
+                hpcf_http_make_response(conn, out_body, conn->write_len);
+                if (out_body != NULL)
+                    free(out_body);
                 return ;
             }
             // 再根据操作类型，调用对应的模块
@@ -131,11 +146,14 @@ void hpcf_tcp_process_read_data(struct hpcf_connection *conn)
             // 先验session
             struct hpcf_processor_module *session_module = hpcf_get_processor_module_by_type(HPCF_MODULE_TYPE_LOGIN_AUTH);
             hpcf_module_processor_callback cb = session_module->callback;
-            ret = cb(conn->read_buffer, conn->read_len, conn->write_buffer, &conn->write_len,
+            ret = cb(conn->body, conn->read_len, &out_body, &conn->write_len,
                         &session_module->data, &conn->data,
                         hpcf_get_processor_callback_by_type);
             if (ret != 0) {
                 printf("session verify error\n");
+                hpcf_http_make_response(conn, out_body, conn->write_len);
+                if (out_body != NULL)
+                    free(out_body);
                 return ;
             }
             // 再根据操作类型，调用对应的模块
@@ -148,9 +166,11 @@ void hpcf_tcp_process_read_data(struct hpcf_connection *conn)
     module = hpcf_get_processor_module_by_type(type);
     if (module == NULL) {
         // 如果找不到对应的模块，就把接收到的数据吐回去
-        memcpy(conn->write_buffer, conn->read_buffer, conn->read_len);
-        conn->write_len = conn->read_len;
-        conn->write_buffer[conn->write_len] = '\0';
+        // conn->write_buffer = malloc(conn->read_len + 1);
+        // memcpy(conn->write_buffer, conn->read_buffer, conn->read_len);
+        // conn->write_len = conn->read_len;
+        // conn->write_buffer[conn->write_len] = '\0';
+        hpcf_http_make_response(conn, conn->body, strlen(conn->body));
         printf("no module for type: %d\n", type);
         return;
     }
@@ -158,9 +178,13 @@ void hpcf_tcp_process_read_data(struct hpcf_connection *conn)
     // 这里处理完毕后，数据就写到了conn->write_buffer中，后面再写到socket中就可以了
     // module->data是模块数据存放指针
     // TODO: 目前感觉还需要再传递一个此连接存放数据的指针，用来存放当前连接的一些数据
-    ret = callback(conn->read_buffer, conn->read_len, conn->write_buffer, &conn->write_len,
+    ret = callback(conn->body, conn->read_len, &out_body, &conn->write_len,
                 &module->data, &conn->data,
                 hpcf_get_processor_callback_by_type);
+    hpcf_http_make_response(conn, out_body, conn->write_len);
+    if (out_body != NULL)
+        free(out_body);
+    free(conn->body);
 }
 
 // 用来建立连接的回调函数
@@ -200,9 +224,12 @@ void hpcf_tcp_read_event_callback(int fd, int events, void *arg)
 
     // 如果hev中的ready为1，说明真的有数据进来了，开始读取数据
     if (hev->ready) {
-        char *buf = c->read_buffer;
-        int n = read(hev->fd, buf, MAX_BUF_SIZE);
+        // char *buf = c->read_buffer;
+        // int n = read(hev->fd, buf, MAX_BUF_SIZE);
 
+        char header[512] = {0};
+        int n = read(hev->fd, header, 511);
+        
         hev->ready = 0;
 
         // 如果读取的数据长度为0，说明连接已经断开了
@@ -222,8 +249,33 @@ void hpcf_tcp_read_event_callback(int fd, int events, void *arg)
             // 数据读取失败了，关闭连接并释放连接所用内存
             hpcf_free_connection(c);
         } else {
-            c->read_len = n;
-            buf[n] = '\0';
+
+            // 解析http请求头
+            llhttp_settings_init(&c->settings);
+            llhttp_init(&c->parser, HTTP_BOTH, &c->settings);
+
+            int req_len = strlen(header);
+            enum llhttp_errno err = llhttp_execute(&c->parser, header, req_len);
+            if (err == HPE_OK) {
+                // success parsed
+                // 获取剩下的content-length
+                int content_length = 0;
+                content_length = c->parser.content_length;
+
+                c->read_buffer = (char *)malloc(content_length + req_len + 10);
+                memset(c->read_buffer, 0, content_length + req_len + 10);
+                memcpy(c->read_buffer, header, req_len);
+                if (content_length > 0) {
+                    read(hev->fd, c->read_buffer + req_len, content_length + 10);
+                }
+            } else {
+                // parse error
+                c->read_buffer = (char *)malloc(512);
+                memset(c->read_buffer, 0, 512);
+                memcpy(c->read_buffer, header, req_len); 
+            }
+
+            c->read_len = strlen(c->read_buffer);
             // 读取成功后，将处理数据的任务放到任务队列中
             struct hpcf_event *proc_ev = hpcf_new_event(c->fd,
                                                         0,

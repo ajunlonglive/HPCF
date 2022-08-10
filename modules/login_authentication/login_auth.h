@@ -76,7 +76,7 @@ struct login_auth_result {
 
 int hpcf_module_lib_init(struct hpcf_processor_module *module);
 
-int login_auth_processor_callback(char *in, int in_size, char *out, int *out_size,
+int login_auth_processor_callback(char *in, int in_size, char **out, int *out_size,
             void **module_data, void **conn_data,
             hpcf_module_get_another_processor_callback_t get_another_processor);
 

@@ -2,6 +2,7 @@
 #define HPCF_CONNECTION
 
 #include "hpcf_event.h"
+#include "libhttp/llhttp.h"
 
 // 应有一个链表，保存所有的连接
 struct hpcf_connection {
@@ -15,6 +16,11 @@ struct hpcf_connection {
     char *write_buffer;  // 用来存储发送结果的数据
     int write_len;
     void *data;         // 用来存储用户自定义数据
+
+    // 用来解析http请求的结构
+    llhttp_t parser;
+    llhttp_settings_t settings;
+    char *body;
 };
 
 struct hpcf_connection *hpcf_new_connection(int fd,

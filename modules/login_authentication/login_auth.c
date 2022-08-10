@@ -36,7 +36,7 @@ int hpcf_module_lib_init(struct hpcf_processor_module *module)
 
 // 如果json header中sessionid不为空的话，则验证sessionid是否有效，如果有效则返回0，否则返回-1
 // 如果json header中sessionid为空的话，则认为是请求sessionid的流程，最终返回一个sessionid
-int login_auth_processor_callback(char *in, int in_size, char *out, int *out_size,
+int login_auth_processor_callback(char *in, int in_size, char **out, int *out_size,
             void **module_data, void **conn_data,
             hpcf_module_get_another_processor_callback_t get_another_processor)
 {
@@ -51,6 +51,10 @@ int login_auth_processor_callback(char *in, int in_size, char *out, int *out_siz
         *conn_data = (void *)malloc(1024);
         memset(*conn_data, 0, 1024);
     }
+    if (*out == NULL) {
+        *out = (char *)malloc(2 * 1024);
+        memset(*out, 0, (2 * 1024));
+    }
 
     // 解析json
     ret = login_auth_parse_req(in, in_size, &req);
@@ -60,13 +64,13 @@ int login_auth_processor_callback(char *in, int in_size, char *out, int *out_siz
 
     if (strlen(req.h.session_id) != 0) {
         // 验证sessionid是否有效
-        ret = login_auth_verify_sessionid(&req, req.h.session_id, *module_data, out, out_size);
+        ret = login_auth_verify_sessionid(&req, req.h.session_id, *module_data, *out, out_size);
         if (ret != 0) {
             goto out;
         }
     } else {
         // 获取sessionid
-        ret = login_auth_get_sessionid(&req, *module_data, *conn_data, out, out_size);
+        ret = login_auth_get_sessionid(&req, *module_data, *conn_data, *out, out_size);
         if (ret != 0) {
             goto out;
         }

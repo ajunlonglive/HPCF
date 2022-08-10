@@ -11,7 +11,8 @@
 
 typedef void *(*hpcf_module_get_another_processor_callback_t)(int module_type);
 
-typedef int (*hpcf_module_processor_callback)(char *in, int in_size, char *out, int *out_size,
+// out 带回一个包含数据的指针，后面由框架进行写数据的封装
+typedef int (*hpcf_module_processor_callback)(char *in, int in_size, char **out, int *out_size,
                 void **module_data, void **conn_data,
                 hpcf_module_get_another_processor_callback_t get_another_processor);
 

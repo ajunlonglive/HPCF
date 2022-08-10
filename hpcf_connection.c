@@ -27,14 +27,15 @@ struct hpcf_connection *hpcf_new_connection(int fd,
     }
 
     conn->fd = fd;
-    conn->read_buffer = (char *)malloc(MAX_BUF_SIZE);
-    if (conn->read_buffer == NULL) {
-        goto err1;
-    }
-    conn->write_buffer = (char *)malloc(MAX_BUF_SIZE);
-    if (conn->write_buffer == NULL) {
-        goto err2;
-    }
+    // 在解析http请求时动态分配大小，不再是固定的8k
+    // conn->read_buffer = (char *)malloc(MAX_BUF_SIZE);
+    // if (conn->read_buffer == NULL) {
+    //     goto err1;
+    // }
+    // conn->write_buffer = (char *)malloc(MAX_BUF_SIZE);
+    // if (conn->write_buffer == NULL) {
+    //     goto err2;
+    // }
     conn->read_event = hpcf_new_event(fd, EPOLLIN, read_callback, accept, conn);
     if (conn->read_event == NULL) {
         goto err3;

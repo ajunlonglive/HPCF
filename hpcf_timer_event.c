@@ -1,4 +1,3 @@
-#include <bits/types/struct_timeval.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>

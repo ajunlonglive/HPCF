@@ -1,4 +1,3 @@
-#include <bits/types/struct_timeval.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -259,6 +258,7 @@ int login_auth_get_sessionid(struct login_auth_req *req, void *module_data, void
         // 把生成的sessionid放到conn_data中
         struct login_auth_result result;
         memset(&result, 0, sizeof(result));
+        memset(conn_data, 0, 1024);
 
         char ran_str[33] = {0};
         ret = login_auth_gen_32_random_string(ran_str);
@@ -311,6 +311,11 @@ int login_auth_get_sessionid(struct login_auth_req *req, void *module_data, void
 
         struct login_auth_result result;
         memset(&result, 0, sizeof(result));
+
+        printf("random_str: %s\n", random_str);
+        printf("username: %s\n", username);
+
+        printf("conn_data: %s\n", (char *)conn_data);
 
         // 验证random_str
         if (strcmp((char *)conn_data, random_str)) {

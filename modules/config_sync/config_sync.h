@@ -40,6 +40,25 @@
             "Count": -1
         }
     }
+以上报文用于获取其它机器的配置，为了保证配置管理和配置同步报文的统一性，应使用以下报文
+赵忠亮在配置管理时应使用下面的格式，方便配置同步报文的解析
+    "Body": {
+        "Processor": "LocalAddOneConfig",
+        "Scope": {
+            "Start": 0,
+            "Count": 1
+        },
+        "ConfigData": "ConfigData"
+    }
+    或
+    "Body": {
+        "Processor": "LocalDeleteOneConfig",
+        "Scope": {
+            "Start": 0,
+            "Count": 1
+        },
+        "ConfigData": ""
+    }
 }
 
 响应报文

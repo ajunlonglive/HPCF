@@ -463,7 +463,7 @@ int main(int argc, char *argv[])
 
     int listen_fd = hpcf_init_listen_socket(g_epoll_fd, HPCF_LISTEN_PORT);
 
-#ifdef HPCF_DEBUG
+#ifndef HPCF_DEBUG
 
     // create worker process
     int i;

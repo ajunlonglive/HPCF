@@ -18,6 +18,8 @@ struct hpcf_connection *hpcf_new_connection(int fd,
     struct hpcf_connection *conn = 
         (struct hpcf_connection *)malloc(sizeof(struct hpcf_connection));
     
+    memset(conn, 0, sizeof(struct hpcf_connection));
+    
     if (conn == NULL) {
         return NULL;
     }

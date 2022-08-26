@@ -2,6 +2,7 @@
 #define MODULES_LOGIN_AUTHENTICATION_HPCF_MODULE_HEADER
 
 #include "hpcf_list_helper.h"
+#include "../hpcf_module_type.h"
 // struct list_head {
 //     struct list_head *next;
 //     struct list_head *prev;

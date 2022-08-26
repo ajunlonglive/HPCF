@@ -4,6 +4,7 @@
 #define MODULES_CONFIG_SYNC_HPCF_MODULE_HEADER
 
 #include "hpcf_list_helper.h"
+#include "../hpcf_module_type.h"
 // struct list_head {
 //     struct list_head *next;
 //     struct list_head *prev;
@@ -31,13 +32,6 @@ struct hpcf_processor_module {
 
 // 必须实现的接口
 // int hpcf_module_lib_init(struct hpcf_processor_module *module);
-
-#define HPCF_MODULE_TYPE_UNKNOWN 0
-#define HPCF_MODULE_TYPE_LOGIN_AUTH 1       // 登录认证模块     Session
-#define HPCF_MODULE_TYPE_CONFIG_SYNC 2      // 配置同步模块     ConfigSync
-#define HPCF_MODULE_TYPE_OPERATION_PROCESS 3    // 运算处理模块，赵忠亮     Operation
-#define HPCF_MODULE_TYPE_KEY_MANAGER 4      // 密钥管理模块，赵忠亮     KeyManager
-#define HPCF_MODULE_TYPE_USER_MANAGER 5     // 用户管理模块，梁育濣     UserManager
 
 #endif /* MODULES_CONFIG_SYNC_HPCF_MODULE_HEADER */
 

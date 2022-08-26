@@ -1,7 +1,6 @@
 objects = $(patsubst %.c,%.o,$(wildcard *.c))
-CFLAGS = -g
+CFLAGS = -g -DHPCF_DEBUG
 LIBS = -lpthread -ldl ./libhttp/libhttp.a
-DEFINES = -HPCF_DEBUG
 
 all: libjson libhttp modules crypto_cloud
 

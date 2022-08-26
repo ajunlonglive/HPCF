@@ -7,7 +7,6 @@
 #include <time.h>
 
 #include "hpcf_module_header.h"
-#include "hpcf_module_type.h"
 #include "login_auth.h"
 #include "parson.h"
 #include "sm3.h"

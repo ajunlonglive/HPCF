@@ -230,6 +230,39 @@
 }
 */
 
+enum ConfigSyncProcessor
+{
+    // 添加一个配置
+    ADD_ONE_CONFIG = 1,
+    // 删除一个配置
+    DEl_ONE_CONFIG = 2,
+    // 获取一个配置
+    GET_ONE_CONFIG = 3,
+    // 修改一个配置
+    MODIFY_ONE_CONFIG = 4,
+    // 获取全部配置
+    GET_ALL_CONFIG = 5,
+    // 创建添加一个配置的请求
+    CREATE_ADD_ONE_CONFIG_REQUEST = 6,
+    // 创建删除一个配置的请求
+    CREATE_DEL_ONE_CONFIG_REQUEST = 7,
+    // 创建获取一个配置的请求
+    CREATE_GET_ONE_CONFIG_REQUEST = 8,
+    // 创建修改一个配置的请求
+    CREATE_MODIFY_ONE_CONFIG_REQUEST = 9,
+    // 创建获取全部配置的请求
+    CREATE_GET_ALL_CONFIG_REQUEST = 10,
+};
+
+struct config_sync_body {
+    // 操作类型
+    ConfigSyncProcessor processor;
+    // 哪个配置文件
+    char type[64];
+    // Data字段的内容由配置库的实现决定
+    char *data;
+};
+
 
 int hpcf_module_lib_init(struct hpcf_processor_module *module);
 
@@ -237,5 +270,36 @@ int hpcf_module_lib_init(struct hpcf_processor_module *module);
 int config_sync_processor_callback(char *in, int in_size, char **out, int *out_size,
             void **module_data, void **conn_data,
             hpcf_module_get_another_processor_callback_t get_another_processor);
+
+// TODO: 以下函数均未实现
+// 添加一条配置
+int add_one_config(char *type, char *data, char **out, int *out_size);
+
+// 删除一条配置
+int del_one_config(char *type, char *data, char **out, int *out_size);
+
+// 获取一条配置
+int get_one_config(char *type, char *data, char **out, int *out_size);
+
+// 修改一条配置
+int modify_one_config(char *type, char *data, char **out, int *out_size);
+
+// 获取全部配置
+int get_all_config(char *type, char **out, int *out_size);
+
+// 创建添加一条配置的请求
+int create_add_one_config_request(char *type, char *data, char **out, int *out_size);
+
+// 创建删除一条配置的请求
+int create_del_one_config_request(char *type, char *data, char **out, int *out_size);
+
+// 创建获取一条配置的请求
+int create_get_one_config_request(char *type, char *data, char **out, int *out_size);
+
+// 创建修改一条配置的请求
+int create_modify_one_config_request(char *type, char *data, char **out, int *out_size);
+
+// 创建获取全部配置的请求
+int create_get_all_config_request(char *type, char **out, int *out_size);
 
 #endif /* MODULES_CONFIG_SYNC_CONFIG_SYNC */

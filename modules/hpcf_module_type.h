@@ -8,5 +8,6 @@
 #define HPCF_MODULE_TYPE_KEY_MANAGER 4      // 密钥管理模块，赵忠亮     KeyManager
 #define HPCF_MODULE_TYPE_USER_MANAGER 5     // 用户管理模块，梁育濣     UserManager
 #define HPCF_MODULE_TYPE_REMOTE_TASK 6      // 远程任务模块，程贺明，供其它模块调用，不可直接通过接口派发
+#define HPCF_MODULE_TYPE_HTTP_HELPER 7      // http帮助模块，供其它模块调用
 
 #endif /* MODULES_HPCF_MODULE_TYPE */
